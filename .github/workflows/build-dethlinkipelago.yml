@@ -58,12 +58,12 @@ jobs:
       - name: Export Windows EXE
         working-directory: ${{ env.GODOT_PROJECT_DIR }}
         run: |
-          mkdir -p ../../builds/Deathlinkipelago
-          ../../godot/Godot_v${GODOT_VERSION}_mono_linux_x86_64/Godot_v${GODOT_VERSION}_mono_linux.x86_64 \
+          mkdir -p ../builds/Deathlinkipelago
+          ../godot/Godot_v${GODOT_VERSION}_mono_linux_x86_64/Godot_v${GODOT_VERSION}_mono_linux.x86_64 \
             --headless \
             --path . \
             --export-release "${EXPORT_PRESET}" \
-            "../../${EXPORT_OUTPUT}"
+            "../${EXPORT_OUTPUT}"
 
       - name: Zip build
         run: |
