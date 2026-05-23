@@ -16,7 +16,11 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      GODOT_VERSION: "4.5-stable"
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+      GODOT_RELEASE: "4.5-stable"
+      GODOT_TEMPLATE_DIR: "4.5.stable.mono"
+
       GODOT_PROJECT_DIR: "DeathLinkipelago"
       EXPORT_PRESET: "Windows Desktop"
       EXPORT_OUTPUT: "builds/Deathlinkipelago/DeathLinkipelago.exe"
@@ -35,15 +39,23 @@ jobs:
       - name: Download Godot .NET
         run: |
           mkdir -p godot
-          wget -O godot.zip "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_mono_linux_x86_64.zip"
+          wget -O godot.zip "https://github.com/godotengine/godot-builds/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_mono_linux_x86_64.zip"
           unzip godot.zip -d godot
+          chmod +x godot/Godot_v${GODOT_RELEASE}_mono_linux_x86_64/Godot_v${GODOT_RELEASE}_mono_linux.x86_64
 
       - name: Download Godot export templates
         run: |
-          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.mono
-          wget -O templates.tpz "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_mono_export_templates.tpz"
+          mkdir -p "${HOME}/.local/share/godot/export_templates/${GODOT_TEMPLATE_DIR}"
+          wget -O templates.tpz "https://github.com/godotengine/godot-builds/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_mono_export_templates.tpz"
           unzip templates.tpz -d templates
-          cp -r templates/templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.mono/
+          cp -r templates/templates/* "${HOME}/.local/share/godot/export_templates/${GODOT_TEMPLATE_DIR}/"
+
+      - name: Show Godot/template paths
+        run: |
+          echo "Godot executable:"
+          ls -la godot/Godot_v${GODOT_RELEASE}_mono_linux_x86_64/
+          echo "Export templates:"
+          ls -la "${HOME}/.local/share/godot/export_templates/${GODOT_TEMPLATE_DIR}/"
 
       - name: Restore C# dependencies
         working-directory: ${{ env.GODOT_PROJECT_DIR }}
@@ -55,15 +67,29 @@ jobs:
         run: |
           dotnet build DeathLinkipelago.csproj -c Release --no-restore
 
+      - name: Import Godot project
+        working-directory: ${{ env.GODOT_PROJECT_DIR }}
+        run: |
+          ../godot/Godot_v${GODOT_RELEASE}_mono_linux_x86_64/Godot_v${GODOT_RELEASE}_mono_linux.x86_64 \
+            --headless \
+            --path . \
+            --editor \
+            --quit
+
       - name: Export Windows EXE
         working-directory: ${{ env.GODOT_PROJECT_DIR }}
         run: |
           mkdir -p ../builds/Deathlinkipelago
-          ../godot/Godot_v${GODOT_VERSION}_mono_linux_x86_64/Godot_v${GODOT_VERSION}_mono_linux.x86_64 \
+          ../godot/Godot_v${GODOT_RELEASE}_mono_linux_x86_64/Godot_v${GODOT_RELEASE}_mono_linux.x86_64 \
             --headless \
             --path . \
             --export-release "${EXPORT_PRESET}" \
             "../${EXPORT_OUTPUT}"
+
+      - name: Show build output
+        run: |
+          echo "Build folder:"
+          ls -la builds/Deathlinkipelago
 
       - name: Zip build
         run: |
