@@ -59,6 +59,7 @@ public partial class MainController : Node
 
     [Export] private Control[] _Scenes = [];
     [Export] private Button _FunnyButton;
+    [Export] private Button _ResetLastDeathTimerButton;
     [Export] private BasicTextTable _Inventory;
     [Export] private BasicTextTable _Deaths;
     [Export] private Label _GrassStatus;
@@ -94,6 +95,8 @@ public partial class MainController : Node
     public override void _Ready()
     {
         _FunnyButton.Pressed += () => SendDeath(FunnyButtonMessages[Random.Next(FunnyButtonMessages.Length)]);
+        _ResetLastDeathTimerButton.Pressed += ResetLastDeathTimer;
+    
         // SwitchScene(0);
     }
 
