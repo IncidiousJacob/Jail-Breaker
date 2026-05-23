@@ -59,7 +59,6 @@ public partial class MainController : Node
 
     [Export] private Control[] _Scenes = [];
     [Export] private Button _FunnyButton;
-    [Export] private Button _ResetLastDeathTimerButton;
     [Export] private BasicTextTable _Inventory;
     [Export] private BasicTextTable _Deaths;
     [Export] private Label _GrassStatus;
@@ -99,18 +98,45 @@ public partial class MainController : Node
             _FunnyButton.Pressed += () => SendDeath(FunnyButtonMessages[Random.Next(FunnyButtonMessages.Length)]);
         }
 
-        if (_ResetLastDeathTimerButton is not null)
-        {
-            _ResetLastDeathTimerButton.Pressed += ResetLastDeathTimer;
-        }
-        else
-        {
-            GD.PrintErr("ResetLastDeathTimerButton is not assigned in Main.tscn");
-        }
+        AddResetLastDeathTimerButton();
 
         // SwitchScene(0);
     }
+    private void AddResetLastDeathTimerButton()
+{
+    var deathTrackerBox = GetNodeOrNull<VBoxContainer>(
+        "Deathlinkipelago/Info/Info/Death Tracker/VBoxContainer"
+    );
 
+    if (deathTrackerBox is null)
+    {
+        GD.PrintErr("Could not find Death Tracker VBoxContainer.");
+        return;
+    }
+
+    var existingButton = deathTrackerBox.GetNodeOrNull<Button>("ResetLastDeathTimerButton");
+
+    if (existingButton is null)
+    {
+        existingButton = new Button
+        {
+            Name = "ResetLastDeathTimerButton",
+            Text = "Reset Last Death Timer",
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
+        };
+
+        deathTrackerBox.AddChild(existingButton);
+
+        // Put it directly under the timer label if possible.
+        var label = deathTrackerBox.GetNodeOrNull<Label>("Label2");
+        if (label is not null)
+        {
+            deathTrackerBox.MoveChild(existingButton, label.GetIndex() + 1);
+        }
+    }
+
+    existingButton.Pressed += ResetLastDeathTimer;
+}
     public override void _Process(double delta)
     {
         if (LastDeathTrap > 0) LastDeathTrap -= delta;
