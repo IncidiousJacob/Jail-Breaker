@@ -23,6 +23,11 @@ public partial class DeathTracker : Control
         MaxTimeSinceLastDeath = 0;
     }
 
+    public static void ResetLastDeathTimer()
+    {
+        TimeSinceLastDeath = 0;
+    }
+
     public override void _Process(double delta)
     {
         if (!DeathQueue.IsEmpty)
