@@ -13,7 +13,7 @@
 [ext_resource type="Script" uid="uid://8lnrr3qsbjfq" path="res://Scripts/Charts/BlameChart.cs" id="8_4kpch"]
 [ext_resource type="Script" uid="uid://cact6ilxym2y3" path="res://Scripts/Settings.cs" id="12_grg3l"]
 
-[node name="PanelContainer" type="PanelContainer" node_paths=PackedStringArray("_Scenes", "_FunnyButton", "_Inventory", "_Deaths", "_GrassStatus", "_LifeCoinStatus", "_SaveStatus", "_ShopLevel", "_ShopItems", "_DeathShop", "_LifeShop", "_Login", "Tracker")]
+[node name="PanelContainer" type="PanelContainer" node_paths=PackedStringArray("_Scenes", "_FunnyButton", "_ResetLastDeathTimerButton", "_Inventory", "_Deaths", "_GrassStatus", "_LifeCoinStatus", "_SaveStatus", "_ShopLevel", "_ShopItems", "_DeathShop", "_LifeShop", "_Login", "Tracker")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -24,6 +24,7 @@ size_flags_vertical = 3
 script = ExtResource("1_r150o")
 _Scenes = [NodePath("Login"), NodePath("Deathlinkipelago")]
 _FunnyButton = NodePath("Deathlinkipelago/Shop/Death Shop/DeathShop/VBoxContainer/Button")
+_ResetLastDeathTimerButton = NodePath("Deathlinkipelago/Info/Info/Death Tracker/VBoxContainer/ResetLastDeathTimerButton")
 _Inventory = NodePath("Deathlinkipelago/Info/Info/Inventory/RichTextLabel")
 _Deaths = NodePath("Deathlinkipelago/Info/Info/Death Tracker/VBoxContainer/RichTextLabel")
 _GrassStatus = NodePath("Deathlinkipelago/Info/Info/Label4")
@@ -183,6 +184,12 @@ text = "Disconnect"
 layout_mode = 2
 theme = ExtResource("2_idj7w")
 horizontal_alignment = 1
+
+[node name="ResetLastDeathTimerButton" type="Button" parent="Deathlinkipelago/Info/Info/Death Tracker/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = ExtResource("2_idj7w")
+text = "Reset Last Death Timer"
 
 [node name="Label3" type="Label" parent="Deathlinkipelago/Info/Info"]
 visible = false
