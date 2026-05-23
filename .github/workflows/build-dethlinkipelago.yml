@@ -50,13 +50,6 @@ jobs:
           unzip templates.tpz -d templates
           cp -r templates/templates/* "${HOME}/.local/share/godot/export_templates/${GODOT_TEMPLATE_DIR}/"
 
-      - name: Show Godot/template paths
-        run: |
-          echo "Godot executable:"
-          ls -la godot/Godot_v${GODOT_RELEASE}_mono_linux_x86_64/
-          echo "Export templates:"
-          ls -la "${HOME}/.local/share/godot/export_templates/${GODOT_TEMPLATE_DIR}/"
-
       - name: Restore C# dependencies
         working-directory: ${{ env.GODOT_PROJECT_DIR }}
         run: |
@@ -82,16 +75,20 @@ jobs:
           mkdir -p ../builds/Deathlinkipelago
           ../godot/Godot_v${GODOT_RELEASE}_mono_linux_x86_64/Godot_v${GODOT_RELEASE}_mono_linux.x86_64 \
             --headless \
+            --verbose \
             --path . \
             --export-release "${EXPORT_PRESET}" \
-            "../${EXPORT_OUTPUT}"
+            "../${EXPORT_OUTPUT}" 2>&1 | tee ../builds/Deathlinkipelago/export-log.txt
 
       - name: Show build output
         run: |
-          echo "Build folder:"
-          ls -la builds/Deathlinkipelago
+          echo "Build folder contents:"
+          find builds/Deathlinkipelago -maxdepth 3 -type f -print
+          echo ""
+          echo "Build folder directories:"
+          find builds/Deathlinkipelago -maxdepth 3 -type d -print
 
-      - name: Zip build
+      - name: Zip full build folder
         run: |
           cd builds/Deathlinkipelago
           zip -r DeathLinkipelago-Windows.zip .
