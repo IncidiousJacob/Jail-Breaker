@@ -36,6 +36,22 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
+      - name: Create missing Godot C# solution
+        working-directory: ${{ env.GODOT_PROJECT_DIR }}
+        run: |
+          if [ ! -f DeathLinkipelago.sln ]; then
+            dotnet new sln -n DeathLinkipelago
+          fi
+
+          dotnet sln DeathLinkipelago.sln add DeathLinkipelago.csproj || true
+
+      - name: Force external C# export files
+        working-directory: ${{ env.GODOT_PROJECT_DIR }}
+        run: |
+          if grep -q "dotnet/embed_build_outputs=true" export_presets.cfg; then
+            sed -i 's/dotnet\/embed_build_outputs=true/dotnet\/embed_build_outputs=false/g' export_presets.cfg
+          fi
+
       - name: Download Godot .NET
         run: |
           mkdir -p godot
@@ -53,12 +69,12 @@ jobs:
       - name: Restore C# dependencies
         working-directory: ${{ env.GODOT_PROJECT_DIR }}
         run: |
-          dotnet restore DeathLinkipelago.csproj
+          dotnet restore DeathLinkipelago.sln
 
       - name: Build C# project
         working-directory: ${{ env.GODOT_PROJECT_DIR }}
         run: |
-          dotnet build DeathLinkipelago.csproj -c Release --no-restore
+          dotnet build DeathLinkipelago.sln -c Release --no-restore
 
       - name: Import Godot project
         working-directory: ${{ env.GODOT_PROJECT_DIR }}
@@ -83,10 +99,11 @@ jobs:
       - name: Show build output
         run: |
           echo "Build folder contents:"
-          find builds/Deathlinkipelago -maxdepth 3 -type f -print
-          echo ""
-          echo "Build folder directories:"
-          find builds/Deathlinkipelago -maxdepth 3 -type d -print
+          find builds/Deathlinkipelago -maxdepth 5 -print
+
+      - name: Verify EXE exists
+        run: |
+          test -f builds/Deathlinkipelago/DeathLinkipelago.exe
 
       - name: Zip full build folder
         run: |
