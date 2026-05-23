@@ -94,9 +94,20 @@ public partial class MainController : Node
 
     public override void _Ready()
     {
-        _FunnyButton.Pressed += () => SendDeath(FunnyButtonMessages[Random.Next(FunnyButtonMessages.Length)]);
-        _ResetLastDeathTimerButton.Pressed += ResetLastDeathTimer;
-    
+        if (_FunnyButton is not null)
+        {
+            _FunnyButton.Pressed += () => SendDeath(FunnyButtonMessages[Random.Next(FunnyButtonMessages.Length)]);
+        }
+
+        if (_ResetLastDeathTimerButton is not null)
+        {
+            _ResetLastDeathTimerButton.Pressed += ResetLastDeathTimer;
+        }
+        else
+        {
+            GD.PrintErr("ResetLastDeathTimerButton is not assigned in Main.tscn");
+        }
+
         // SwitchScene(0);
     }
 
