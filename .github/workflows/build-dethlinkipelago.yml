@@ -1,0 +1,77 @@
+name: Build DeathLinkipelago
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - "DeathLinkipelago/**"
+      - ".github/workflows/build-deathlinkipelago.yml"
+
+jobs:
+  build-windows:
+    name: Build Windows EXE
+    runs-on: ubuntu-latest
+
+    env:
+      GODOT_VERSION: "4.5-stable"
+      GODOT_PROJECT_DIR: "DeathLinkipelago"
+      EXPORT_PRESET: "Windows Desktop"
+      EXPORT_OUTPUT: "builds/Deathlinkipelago/DeathLinkipelago.exe"
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Download Godot .NET
+        run: |
+          mkdir -p godot
+          wget -O godot.zip "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_mono_linux_x86_64.zip"
+          unzip godot.zip -d godot
+
+      - name: Download Godot export templates
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.mono
+          wget -O templates.tpz "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_mono_export_templates.tpz"
+          unzip templates.tpz -d templates
+          cp -r templates/templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.mono/
+
+      - name: Restore C# dependencies
+        working-directory: ${{ env.GODOT_PROJECT_DIR }}
+        run: |
+          dotnet restore DeathLinkipelago.csproj
+
+      - name: Build C# project
+        working-directory: ${{ env.GODOT_PROJECT_DIR }}
+        run: |
+          dotnet build DeathLinkipelago.csproj -c Release --no-restore
+
+      - name: Export Windows EXE
+        working-directory: ${{ env.GODOT_PROJECT_DIR }}
+        run: |
+          mkdir -p ../../builds/Deathlinkipelago
+          ../../godot/Godot_v${GODOT_VERSION}_mono_linux_x86_64/Godot_v${GODOT_VERSION}_mono_linux.x86_64 \
+            --headless \
+            --path . \
+            --export-release "${EXPORT_PRESET}" \
+            "../../${EXPORT_OUTPUT}"
+
+      - name: Zip build
+        run: |
+          cd builds/Deathlinkipelago
+          zip -r DeathLinkipelago-Windows.zip .
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: DeathLinkipelago-Windows
+          path: builds/Deathlinkipelago/DeathLinkipelago-Windows.zip
