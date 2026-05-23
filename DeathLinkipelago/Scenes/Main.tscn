@@ -180,7 +180,7 @@ size_flags_horizontal = 3
 theme = ExtResource("2_idj7w")
 text = "Disconnect"
 
-[node name="Label2" type="Label" parent="Deathlinkipelago/Info/Info"]
+[node name="Label2" type="Label" parent="Deathlinkipelago/Info/Info/Death Tracker/VBoxContainer"]
 layout_mode = 2
 theme = ExtResource("2_idj7w")
 horizontal_alignment = 1
@@ -190,6 +190,8 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme = ExtResource("2_idj7w")
 text = "Reset Last Death Timer"
+
+[node name="ColorRect" type="ColorRect" parent="Deathlinkipelago/Info/Info/Death Tracker/VBoxContainer" node_paths=PackedStringArray("_Tooltip")]
 
 [node name="Label3" type="Label" parent="Deathlinkipelago/Info/Info"]
 visible = false
