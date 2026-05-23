@@ -73,70 +73,91 @@ public partial class MainController : Node
 
     public override void _EnterTree()
     {
-        if (!Directory.Exists(SaveDir))
+        try
         {
-            Directory.CreateDirectory(SaveDir);
-        }
-        else if (File.Exists($"{SaveDir}/data.json"))
-        {
-            var (address, password, slot, port) = JsonConvert.DeserializeObject<LoginInfo>(File
-               .ReadAllText($"{SaveDir}/data.json")
-               .Replace("\r", "")
-               .Replace("\n", ""));
+            if (!Directory.Exists(SaveDir))
+            {
+                Directory.CreateDirectory(SaveDir);
+            }
 
-            _Login.Address = address;
-            _Login.Password = password;
-            _Login.Slot = slot;
-            _Login.PortField = port;
+            File.WriteAllText($"{SaveDir}/startup-log.txt", "Entered _EnterTree OK\n");
+        }
+        catch (Exception ex)
+        {
+            File.WriteAllText("deathlinkipelago-early-crash.txt", ex.ToString());
+            throw;
         }
     }
 
-    public override void _Ready()
+   public override void _Ready()
     {
-        if (_FunnyButton is not null)
+        try
         {
-            _FunnyButton.Pressed += () => SendDeath(FunnyButtonMessages[Random.Next(FunnyButtonMessages.Length)]);
+            File.AppendAllText($"{SaveDir}/startup-log.txt", "Entered _Ready\n");
+
+            if (_FunnyButton is not null)
+            {
+                _FunnyButton.Pressed += () => SendDeath(FunnyButtonMessages[Random.Next(FunnyButtonMessages.Length)]);
+                File.AppendAllText($"{SaveDir}/startup-log.txt", "Funny button hooked\n");
+            }
+            else
+            {
+                File.AppendAllText($"{SaveDir}/startup-log.txt", "Funny button was null\n");
+            }
+
+            AddResetLastDeathTimerButton();
+            File.AppendAllText($"{SaveDir}/startup-log.txt", "Reset timer button setup finished\n");
+
+            // SwitchScene(0);
         }
-
-        AddResetLastDeathTimerButton();
-
-        // SwitchScene(0);
+        catch (Exception ex)
+        {
+            File.WriteAllText($"{SaveDir}/startup-crash.txt", ex.ToString());
+            throw;
+        }
     }
     private void AddResetLastDeathTimerButton()
-{
-    var deathTrackerBox = GetNodeOrNull<VBoxContainer>(
-        "Deathlinkipelago/Info/Info/Death Tracker/VBoxContainer"
-    );
-
-    if (deathTrackerBox is null)
     {
-        GD.PrintErr("Could not find Death Tracker VBoxContainer.");
-        return;
-    }
+        var deathTrackerBox = GetNodeOrNull<VBoxContainer>(
+            "Deathlinkipelago/Info/Info/Death Tracker/VBoxContainer"
+        );
 
-    var existingButton = deathTrackerBox.GetNodeOrNull<Button>("ResetLastDeathTimerButton");
-
-    if (existingButton is null)
-    {
-        existingButton = new Button
+        if (deathTrackerBox is null)
         {
-            Name = "ResetLastDeathTimerButton",
-            Text = "Reset Last Death Timer",
-            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
-        };
-
-        deathTrackerBox.AddChild(existingButton);
-
-        // Put it directly under the timer label if possible.
-        var label = deathTrackerBox.GetNodeOrNull<Label>("Label2");
-        if (label is not null)
-        {
-            deathTrackerBox.MoveChild(existingButton, label.GetIndex() + 1);
+            File.AppendAllText($"{SaveDir}/startup-log.txt", "Death Tracker VBoxContainer was not found\n");
+            GD.PrintErr("Could not find Death Tracker VBoxContainer.");
+            return;
         }
-    }
 
-    existingButton.Pressed += ResetLastDeathTimer;
-}
+        File.AppendAllText($"{SaveDir}/startup-log.txt", "Death Tracker VBoxContainer found\n");
+
+        var existingButton = deathTrackerBox.GetNodeOrNull<Button>("ResetLastDeathTimerButton");
+
+        if (existingButton is null)
+        {
+            existingButton = new Button();
+            existingButton.Name = "ResetLastDeathTimerButton";
+            existingButton.Text = "Reset Last Death Timer";
+            existingButton.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+
+            deathTrackerBox.AddChild(existingButton);
+
+            var label = deathTrackerBox.GetNodeOrNull<Label>("Label2");
+            if (label is not null)
+            {
+                deathTrackerBox.MoveChild(existingButton, label.GetIndex() + 1);
+            }
+
+            File.AppendAllText($"{SaveDir}/startup-log.txt", "Reset button created\n");
+        }
+        else
+        {
+            File.AppendAllText($"{SaveDir}/startup-log.txt", "Reset button already existed\n");
+        }
+
+        existingButton.Pressed += ResetLastDeathTimer;
+        File.AppendAllText($"{SaveDir}/startup-log.txt", "Reset button hooked\n");
+    }
     public override void _Process(double delta)
     {
         if (LastDeathTrap > 0) LastDeathTrap -= delta;
